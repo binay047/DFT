@@ -1,0 +1,235 @@
+chmod +x xyz.sh
+./xyz.sh
+
+To plot ecut vs energy
+plot"ecut vs energy" using 1:2 with linespoint
+set term png
+set output "ecut vs energy.png"
+set title "ecut vs energy"
+set xlabel "ecut"
+set ylabel "energy"
+plot"name of file" using 1:2 with linespoint
+replot
+set term x11
+exit
+To plot resistance vs temperature
+plot"temperature vs resistance" using 1:2 with linespoint
+set term png
+set output "ecut vs energy.png"
+set title "resistance vs temperature"
+set xlabel "temperature(K)"
+set ylabel "Resistance(Ohm)"
+plot"temperature vs resistance" using 1:2 with linespoint
+replot
+set term x11
+To plot kpoint vs energy
+plot"kpoint vs energy" using 1:2 with linespoint
+set term png
+set output "kpoint vs energy.png"
+set title "kpoint vs energy"
+set xlabel "kpoint"
+set ylabel "energy"
+plot"kpoint vs energy" using 1:2 with linespoint
+replot
+set term x11
+exit
+
+To plot lattice vs energy
+plot"lattice vs energy" using 1:2 with linespoint
+set term png
+set output "lattice vs energy.png"
+set title "lattice vs energy"
+set xlabel "lattice parameter"
+set ylabel "energy"
+plot"lattice vs energy" using 1:2 with linespoint
+replot
+set term x11
+exit
+ 
+ ev.x
+ ang
+ fcc
+ 4
+ 
+ 
+&BANDS
+prefix = 'CoMnSb' ,
+outdir = './' ,
+filband = 'upband_struct.dat' ,
+spin_component = 1 ,
+lsym = .true. ,
+no_overlap = .true. ,
+/
+ run: bands.x <upband.in> upband.out
+ 
+&BANDS
+prefix = 'CoMnSb'
+outdir = './',
+filband = 'downband_struct.dat'
+spin_component = 2,
+lsym = .true. ,
+no_overlap = .true. ,
+/
+ run: bands.x <downband.in> downband.out
+ 
+set term postscript enhanced colour
+set output 'upband.ps'
+set key font 'Helvetica, 10'
+unset grid
+unset key
+set yrange [-10:5]
+set xrange [0: 5.1945]
+set xtics ("{/Symbol G}" 0, "{X}" 1.0000, "{W}" 1.5000, "{K}" 1.8536, "{/Symbol G}" 2.9142, "{L}" 3.7802, "{W}" 4.4873, "{U}" 4.8409, "{X}" 5.1945)
+set ylabel "Energy [eV]"
+set arrow from 1.0000, graph 0 to 1.0000, graph 1 nohead
+set arrow from 1.5000, graph 0 to 1.5000, graph 1 nohead
+set arrow from 1.8536, graph 0 to 1.8536, graph 1 nohead
+set arrow from 2.9142, graph 0 to 2.9142, graph 1 nohead
+set arrow from 3.7802, graph 0 to 3.7802, graph 1 nohead
+set arrow from 4.4873, graph 0 to 4.4873, graph 1 nohead
+set arrow from 4.8409, graph 0 to 4.8409, graph 1 nohead
+set arrow from 5.1945, graph 0 to 5.1945, graph 1 nohead
+plot 0 lc 0 lw 2,'upband_struct.dat.gnu' using 1:($2-11.7693 ) smooth csplines ls 7 lw 3 lc 7
+set output
+
+set term postscript enhanced colour
+set output 'downband.ps'
+set key font 'Helvetica, 10'
+unset grid
+unset key
+set yrange [-10:5]
+set xrange [0: 5.1945]
+set xtics ("{/Symbol G}" 0, "{X}" 1.0000, "{W}" 1.5000, "{K}" 1.8536, "{/Symbol G}" 2.9142, "{L}" 3.7802, "{W}" 4.4873, "{U}" 4.8409, "{X}" 5.1945)
+set ylabel "Energy [eV]"
+set arrow from 1.0000, graph 0 to 1.0000, graph 1 nohead
+set arrow from 1.5000, graph 0 to 1.5000, graph 1 nohead
+set arrow from 1.8536, graph 0 to 1.8536, graph 1 nohead
+set arrow from 2.9142, graph 0 to 2.9142, graph 1 nohead
+set arrow from 3.7802, graph 0 to 3.7802, graph 1 nohead
+set arrow from 4.4873, graph 0 to 4.4873, graph 1 nohead
+set arrow from 4.8409, graph 0 to 4.8409, graph 1 nohead
+set arrow from 5.1945, graph 0 to 5.1945, graph 1 nohead
+plot 0 lc 0 lw 2,'downband_struct.dat.gnu' using 1:($2-11.7693) smooth csplines ls 7 lw 3 lc 7
+set output
+
+
+&DOS
+prefix='CoMnSb',
+outdir='./',
+fildos='dos.dat',
+DeltaE= 0.001
+Emin =0,
+Emax =20,
+/
+run: dos.x <dos.in> dos.out
+
+### plot with filledcurves
+reset session
+FILE = "dos.dat"
+set term pngcairo size 640,384
+set output "dos.png"
+set key box font 'Helvetica, 12' top right noautotitle
+set grid
+set style fill transparent solid 1.0 noborder
+set style data filledcurves y=0
+set xlabel "E-E_f [eV]" font 'Helvetica, 20'
+set ylabel "Density of states" font 'Helvetica, 20'
+set xzeroaxis
+set yzeroaxis lt 1 dt 2 lw 1.5 lc "black"
+set xrange[-3:3]
+set yrange[*:*]
+set samples 300
+ plot FILE u ($1-11.7693):2  smooth kdensity bandwidth 0.02 w filledcurves y=0 lc rgb "red"     ti "Spin Up", \
+        '' u ($1-11.7693):(-$3) smooth kdensity bandwidth 0.02 w filledcurves y=0 lc rgb "#4169E1" ti "Spin Down"
+        
+        
+ &PROJWFC
+prefix = 'CoMnSb' ,
+outdir = './' ,
+filpdos= 'pdos' ,
+filproj = 'proj.dat' ,
+DeltaE =0.001
+/
+run:projwfc.x < pdos.in > pdos.out
+sumpdos.x *\(mn\)* > mn.dat
+
+set term pngcairo size 1024,768
+set output "pdos.png"
+set lmargin at screen 0.15
+set rmargin at screen 0.9
+set bmargin at screen 0.15
+set tmargin at screen 0.85
+set key box font 'Helvetica, 12' top right noautotitle
+set xlabel "E-E_f [eV]" font 'Helvetica, 20'
+set xrange[-4:4] # Adjusting the range for a smaller area
+set mxtics 2
+set xzeroaxis lt 1 lc "black"
+set ylabel "PDos(states/ev)" font 'Helvetica, 20'
+set yrange[-10:10] # Adjusting the y range for better fitting
+set yzeroaxis lt 1 dt 2 lw 1.5 lc "black"
+set grid x,y
+unset label
+unset arrow
+set label at first -0.5, -8 "Fermi-Level" font "Helvetica, 12" right
+set arrow from first -0.4, -8 to 0.0, -8
+set label "Spin-Up" at 0.7, 5 center font "Helvetica,12" 
+set label "Spin-Down" at 0.7, -5 center font "Helvetica,12"
+set samples 200 
+set style data lines
+set style line 1 lt 1 lw 1.5 lc rgb "green"
+set style line 2 lt 1 lw 1.5 lc rgb "red"
+set style line 3 lt 1 lw 1.5 lc rgb "hashtag#4169E1"
+set lmargin screen lmargin
+set rmargin screen rmargin
+set bmargin screen bmargin
+set tmargin screen tmargin
+plot 'Co.dat' u ($1-11.7693):2 smooth csplines ls 1 ti "Co-4d", \
+ '' u ($1-11.7693):(-$3) smooth csplines ls 1, \
+ 'Mn.dat' u ($1-11.7693):2 smooth csplines ls 2 ti "Mn-4d", \
+ '' u ($1-12.9258):(-$3) smooth csplines ls 2, \
+ 'Sb.dat' u ($1-11.7693):2 smooth csplines ls 3 ti "Sb-2p", \
+ '' u ($1-11.7693):(-$3) smooth csplines ls 3       
+set output
+
+
+set term pngcairo size 1024,768
+set output "pdos.png"
+set lmargin at screen 0.15
+set rmargin at screen 0.9
+set bmargin at screen 0.15
+set tmargin at screen 0.85
+set key box font 'Helvetica, 12' top right noautotitle
+set xlabel "E-E_f [eV]" font 'Helvetica, 20'
+set xrange[-4:4] # Adjusting the range for a smaller area
+set mxtics 2
+set xzeroaxis lt 1 lc "black"
+set ylabel "PDos(states/ev)" font 'Helvetica, 20'
+set yrange[-10:10] # Adjusting the y range for better fitting
+set yzeroaxis lt 1 dt 2 lw 1.5 lc "black"
+set grid x,y
+unset label
+unset arrow
+set label at first -0.5, -8 "Fermi-Level" font "Helvetica, 12" right
+set arrow from first -0.4, -8 to 0.0, -8
+set label "Spin-Up" at 0.7, 5 center font "Helvetica,12" 
+set label "Spin-Down" at 0.7, -5 center font "Helvetica,12"
+set samples 200 
+set style data lines
+set style line 1 lt 1 lw 1.5 lc rgb "green"
+set style line 2 lt 1 lw 1.5 lc rgb "red"
+set style line 3 lt 1 lw 1.5 lc rgb "#4169E1" # Corrected color name
+plot 'Co.dat' u ($1-11.7693):2 smooth csplines ls 1 ti "Co-4d", \
+     '' u ($1-11.7693):(-$3) smooth csplines ls 1, \
+     'Mn.dat' u ($1-11.7693):2 smooth csplines ls 2 ti "Mn-4d", \
+     '' u ($1-12.9258):(-$3) smooth csplines ls 2, \
+     'Sb.dat' u ($1-11.7693):2 smooth csplines ls 3 ti "Sb-2p", \
+     '' u ($1-11.7693):(-$3) smooth csplines ls 3       
+set outpot
+
+
+for spectra.in
+epsilon.x <spectra.in> spectra.out
+
+
+
+
